@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 # CONFIG
 # =========================================
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-PDF_BASE_PATH = "https://drive.google.com/file/d"  # adjust if hosting PDFs differently
+PDF_BASE_PATH = "pdfs"  # PDFs are stored in repo under /pdfs folder
 
 # =========================================
 # LOAD FAISS INDEX + METADATA
@@ -45,7 +45,10 @@ def search(query, top_k=5):
     for idx, sim in zip(indices[0], similarities[0]):
         doc = documents[idx]
         pdf_file = doc["file_name"].replace("_raw.txt", ".pdf")
+
+        # Link to PDF inside repo
         pdf_link = f"{PDF_BASE_PATH}/{pdf_file}"
+
         results.append({
             "chunk_id": doc["chunk_id"],
             "doc_id": doc["doc_id"],
