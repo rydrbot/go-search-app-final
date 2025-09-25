@@ -11,8 +11,8 @@ from sentence_transformers import SentenceTransformer
 # =========================================
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-# Your GitHub repo raw base for PDFs
-GITHUB_RAW_BASE = "https://raw.githubusercontent.com/rydrbot/go-search-app-final/main/pdfs"
+# ✅ Use jsDelivr CDN for serving PDFs inline
+JSDELIVR_BASE = "https://cdn.jsdelivr.net/gh/rydrbot/go-search-app-final@main/pdfs"
 
 # =========================================
 # LOAD FAISS INDEX + METADATA
@@ -49,11 +49,11 @@ def search(query, top_k=5):
         doc = documents[idx]
         pdf_file = doc["file_name"].replace("_raw.txt", ".pdf")
 
-        # ✅ Encode filename so spaces/special chars don’t break the link
+        # ✅ Encode filename for URL safety
         pdf_file_encoded = urllib.parse.quote(pdf_file)
 
-        # GitHub raw link
-        pdf_link = f"{GITHUB_RAW_BASE}/{pdf_file_encoded}"
+        # Build jsDelivr link
+        pdf_link = f"{JSDELIVR_BASE}/{pdf_file_encoded}"
 
         results.append({
             "chunk_id": doc["chunk_id"],
