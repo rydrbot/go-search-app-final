@@ -3,6 +3,7 @@ import json
 import streamlit as st
 import numpy as np
 import faiss
+import urllib.parse
 from sentence_transformers import SentenceTransformer
 
 # =========================================
@@ -18,12 +19,16 @@ GITHUB_RAW_BASE = "https://raw.githubusercontent.com/rydrbot/go-search-app-final
 # =========================================
 @st.cache_resource
 def load_index():
+    # Load FAISS index
     index = faiss.read_index("go_index.faiss")
 
+    # Load metadata
     with open("metadata.json", "r", encoding="utf-8") as f:
         documents = json.load(f)
 
+    # Load embedding model (for queries only)
     model = SentenceTransformer(MODEL_NAME)
+
     return documents, index, model
 
 documents, index, model = load_index()
@@ -32,9 +37,11 @@ documents, index, model = load_index()
 # SEARCH FUNCTION
 # =========================================
 def search(query, top_k=5):
+    # Create query embedding
     query_emb = model.encode([query], convert_to_numpy=True)
     query_emb = query_emb / np.linalg.norm(query_emb, axis=1, keepdims=True)
 
+    # Search FAISS
     similarities, indices = index.search(query_emb, top_k)
 
     results = []
@@ -42,8 +49,11 @@ def search(query, top_k=5):
         doc = documents[idx]
         pdf_file = doc["file_name"].replace("_raw.txt", ".pdf")
 
-        # Build raw GitHub link
-        pdf_link = f"{GITHUB_RAW_BASE}/{pdf_file}"
+        # ✅ Encode filename so spaces/special chars don’t break the link
+        pdf_file_encoded = urllib.parse.quote(pdf_file)
+
+        # GitHub raw link
+        pdf_link = f"{GITHUB_RAW_BASE}/{pdf_file_encoded}"
 
         results.append({
             "chunk_id": doc["chunk_id"],
